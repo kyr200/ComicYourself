@@ -2,45 +2,58 @@
 
 //__________________________________________________________________________________________________________________________
 void drawCam()
-{
-        
-        textFont(font);
-        text("Capture Mode", 20, 40);
+{  
+    textFont(font);
+    text("Capture Mode", 20, 40);
+
+    frame = webcam;
+    
+    //if(removeBackground)
+    //	removeBackground(frame);
 	
-        frame = webcam;
-        
-        removeBackground(frame);
 	pushMatrix();
 
 	//flip across x axis
 	scale(-1,1);
-	image(frame, -(width - 800)/2 -800, 70, 800, 600);
-	popMatrix(); 
+	if(removeBackground)
+        {
+		image(removeBackground(frame.get()), -(width - 800)/2 -800, 70, 800, 600);
+	}
+        else if(changeBackground)
+        {
+                image(changeBackground(removeBackground(frame.get())), -(width - 800)/2 -800, 70, 800, 600);
+        }
+        else
+        {
+		image(frame, -(width - 800)/2 -800, 70, 800, 600);		
+	}
+        popMatrix(); 
 }
 
-void removeBackground(PImage frame)
+PImage removeBackground(PImage frame)
 {       
         
-        mode2Calibration.loadPixels();
-        frame.loadPixels();
-        for (int y=0; y<frame.height; y++) {
-          for (int x=0; x<frame.width; x++) {
-            int loc = x + y * frame.width;
-            color display = frame.pixels[loc];
-            color comparison = mode2Calibration.pixels[loc];
-            
-            float r1 = red(display); float g1 = green(display); float b1 = blue(display);
-            float r2 = red(comparison); float g2 = green(comparison); float b2 = blue(comparison);
-            float diff = dist(r1,g1,b1,r2,g2,b2);
-            
-            if(diff < threshold){
-                  frame.pixels[loc] = color(255);
-            }
-            
-          }
-        }
-        frame.updatePixels();        
+    mode2Calibration.loadPixels();
+    frame.loadPixels();
+    for (int y=0; y<frame.height; y++) {
+      for (int x=0; x<frame.width; x++) {
+        int loc = x + y * frame.width;
+        color display = frame.pixels[loc];
+        color comparison = mode2Calibration.pixels[loc];
         
+        float r1 = red(display); float g1 = green(display); float b1 = blue(display);
+        float r2 = red(comparison); float g2 = green(comparison); float b2 = blue(comparison);
+        float diff = dist(r1,g1,b1,r2,g2,b2);
+        
+        if(diff < threshold){
+              frame.pixels[loc] = color(255);
+        }
+        
+      }
+    }
+    frame.updatePixels(); 
+    calibratedFrame = frame.get();       
+    return calibratedFrame;
 }
 
 
@@ -74,6 +87,16 @@ void mode2phase1Buttons()
                         .align(CENTER,CENTER,CENTER,CENTER)
                         .setSize(40, 40)
                         ;
+                        
+                if(removeBackground){
+                cp5.addButton("backgroundSelection")
+                        .setPosition(width/2 + 110, 677)
+                        .setCaptionLabel("C Background")
+                        .align(CENTER,CENTER,CENTER,CENTER)
+                        .setSize(200, 40)
+                        ;
+                }
+                
 
 		displayButtons = false;
 	}
@@ -116,7 +139,18 @@ public void takePhoto()
 	Snap.play();
 	try
 	{
-		mode2Capture = frame.get();
+		if(removeBackground)
+		{
+                	mode2Capture = calibratedFrame.get();
+                }        
+		else if(changeBackground)
+                {
+                        mode2Capture = editedFrame.get();
+                }
+                else
+                {
+			mode2Capture = frame.get();
+                }
 	}
 	catch(NullPointerException e)
 	{
@@ -173,6 +207,8 @@ public void mode2phase2save()
 	mode = 1;
 	cp5.hide();
 	displayButtons = true;
+	removeBackground = false;
+        changeBackground = false;
 }
 
 
@@ -244,6 +280,7 @@ public void takeCalibrationPhoto(){
   cp5.hide();
   displayButtons = true;
   //mirror(mode2Calibration);
+  removeBackground = true;
   
   
 }
@@ -253,4 +290,54 @@ public void mode2phase3back()
   phase = 1;
   cp5.hide();  
   displayButtons = true;
+}
+
+//_________________________________________________________________
+//_________________________________________________________________
+//_________________________________________________________________
+//_________________________________________________________________
+//_________________________________________________________________
+//_________________________________________________________________
+
+public void loadStockBackground()
+{
+  String path = sketchPath+"/stockbackground/"; //folder of images rename as needed
+  File[] files = listFiles(path);
+  stockBackground = new PImage[files.length];
+  for(int i=0; i<files.length; i++){
+    stockBackground[i]=loadImage(files[i].getAbsolutePath());
+    imageResize(stockBackground[i]);
+  }
+}
+
+public void imageResize(PImage img){
+  img.resize(640,480);
+}
+
+public void backgroundSelection()
+{
+  loadStockBackground();
+  changeBackground = true;
+  removeBackground = false;  
+}
+
+PImage changeBackground(PImage frame)
+{       
+        
+    stockBackground[0].loadPixels();
+    frame.loadPixels();
+    for (int y=0; y<frame.height; y++) {
+      for (int x=0; x<frame.width; x++) {
+        int loc = x + y * frame.width;
+        color display = frame.pixels[loc];        
+        
+        if(display == color(255)){
+              frame.pixels[loc] = stockBackground[0].pixels[loc];
+        }
+        
+      }
+    }
+    frame.updatePixels(); 
+    editedFrame = frame.get();       
+    return editedFrame;
 }
