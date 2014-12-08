@@ -18,16 +18,17 @@ void drawCam()
 	if(removeBackground)
         {
 		image(removeBackground(frame.get()), -(width - 800)/2 -800, 70, 800, 600);
-	}
+        }
         else if(changeBackground)
         {
-                image(changeBackground(removeBackground(frame.get())), -(width - 800)/2 -800, 70, 800, 600);
+          image(changeBackground(removeBackground(frame.get())), -(width - 800)/2 -800, 70, 800, 600);
+
         }
-        else
+	else
         {
-		image(frame, -(width - 800)/2 -800, 70, 800, 600);		
-	}
-        popMatrix(); 
+		image(frame, -(width - 800)/2 -800, 70, 800, 600);	
+        }	
+	popMatrix(); 
 }
 
 PImage removeBackground(PImage frame)
@@ -68,36 +69,34 @@ void mode2phase1Buttons()
 		cp5.setControlFont(buttonFont);
 
 		cp5.addButton("takePhoto")
-			.setPosition(width/2 + 10, 677)
-			.setCaptionLabel("C")
+			.setPosition(width/2 - 30, 677)
+			.setCaptionLabel("Capture")
 			.align(CENTER,CENTER,CENTER,CENTER)
-			.setSize(40, 40)
+			.setSize(100, 40)
 			;
 
 		cp5.addButton("backButton")
-			.setPosition(width/2 - 50, 677)
+			.setPosition(width/2 - 100, 677)
 			.setCaptionLabel("<")
 			.align(CENTER,CENTER,CENTER,CENTER)
 			.setSize(40, 40)
 			;
                 
                 cp5.addButton("goToCalibrationPhase")
-                        .setPosition(width/2 + 60, 677)
-                        .setCaptionLabel("Cal")
+                        .setPosition(width/2 + 100, 677)
+                        .setCaptionLabel("Calibrate")
                         .align(CENTER,CENTER,CENTER,CENTER)
-                        .setSize(40, 40)
+                        .setSize(110, 40)
                         ;
-                        
+
                 if(removeBackground){
                 cp5.addButton("backgroundSelection")
-                        .setPosition(width/2 + 110, 677)
-                        .setCaptionLabel("C Background")
+                        .setPosition(width/2 + 250, 677)
+                        .setCaptionLabel("Background")
                         .align(CENTER,CENTER,CENTER,CENTER)
                         .setSize(200, 40)
                         ;
                 }
-                
-
 		displayButtons = false;
 	}
 }
@@ -114,10 +113,10 @@ void mode2phase2Buttons()
 		cp5.setControlFont(buttonFont);
 
 		cp5.addButton("mode2phase2save")
-			.setPosition(width/2 + 10, 677)
-			.setCaptionLabel("S")
+			.setPosition(width/2 + 40, 677)
+			.setCaptionLabel("Save")
 			.align(CENTER,CENTER,CENTER,CENTER)
-			.setSize(40, 40)
+			.setSize(80, 40)
 			;
 
 		cp5.addButton("mode2phase2back")
@@ -140,17 +139,13 @@ public void takePhoto()
 	try
 	{
 		if(removeBackground)
-		{
-                	mode2Capture = calibratedFrame.get();
-                }        
+			mode2Capture = calibratedFrame.get();
 		else if(changeBackground)
-                {
-                        mode2Capture = editedFrame.get();
-                }
+                        mode2Capture = editedFrame.get();                
                 else
-                {
 			mode2Capture = frame.get();
-                }
+
+
 	}
 	catch(NullPointerException e)
 	{
@@ -236,6 +231,8 @@ public void calibrationPhase()
   image(frame, -(width - 800)/2 -800, 70, 800, 600);
   popMatrix(); 
 }
+
+
 //-----------------------------
 public void mode2phase3buttons()
 {
